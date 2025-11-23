@@ -1,4 +1,8 @@
 package com.tracker.dto;
 
-public record ApiResponse() {
+public record ApiResponse<T>(
+        boolean success,
+        String message,
+        T data
+) {
 }

@@ -4,6 +4,7 @@ import com.tracker.dto.BulkUploadResponse;
 import com.tracker.dto.LearningStats;
 import com.tracker.dto.TopicRequest;
 import com.tracker.model.Topic;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,5 +21,7 @@ public interface TopicService {
     public BulkUploadResponse bulkUpload(List<TopicRequest> requests);
     public List<Topic> getOverdueTopics();
     public Topic updateDeadline(String id, LocalDate deadline);
+    public Page<Topic> getPagedTopics(int page, int size);
+    public Topic markCompleted(String id);
 
 }
