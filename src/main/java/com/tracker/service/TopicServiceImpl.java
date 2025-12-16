@@ -202,6 +202,21 @@ public class TopicServiceImpl implements TopicService {
         return topicRepository.save(topic);
     }
 
+    @Override
+    public Topic getById(String id) {
+        log.info("Fetching topic by id: {}", id);
+
+        Topic topic = topicRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Topic not found with id: {}", id);
+                    return new RuntimeException("Topic not found with id: " + id);
+                });
+
+        log.info("Topic fetched successfully: {}", topic.getName());
+
+        return topic;
+    }
+
     // ================= PRIVATE BUSINESS LOGIC =================
 
     private LearningStatus evaluateStatus(int confidence) {

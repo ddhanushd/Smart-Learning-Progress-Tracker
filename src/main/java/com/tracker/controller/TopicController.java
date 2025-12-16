@@ -207,4 +207,17 @@ public class TopicController {
                 )
         );
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<TopicResponse>> getById(@PathVariable String id) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Topic fetched successfully",
+                        TopicMapper.toResponse(topicService.getById(id))
+                )
+        );
+    }
+
+
 }

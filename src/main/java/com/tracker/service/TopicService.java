@@ -23,5 +23,7 @@ public interface TopicService {
     public Topic updateDeadline(String id, LocalDate deadline);
     public Page<Topic> getPagedTopics(int page, int size);
     public Topic markCompleted(String id);
+    public Topic getById(String id);
+
 
 }
