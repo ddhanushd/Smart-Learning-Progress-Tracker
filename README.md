@@ -132,6 +132,7 @@ Base URL:
 | ------ | -------------- | ------------------ |
 | POST   | /              | Create Topic       |
 | GET    | /              | Get All Topics     |
+| GET    | /{id}          | Get Topic by ID    |
 | GET    | /weak          | Weak Topics        |
 | PUT    | /{id}/revise   | Revise Topic       |
 | PUT    | /{id}/complete | Mark as Complete   |
@@ -141,6 +142,7 @@ Base URL:
 | GET    | /search?q=     | Search Topics      |
 | GET    | /overdue       | Overdue Topics     |
 | POST   | /bulk          | Bulk Upload        |
+
 
 ---
 
