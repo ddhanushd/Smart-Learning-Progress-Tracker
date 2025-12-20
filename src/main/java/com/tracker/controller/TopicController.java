@@ -6,6 +6,7 @@ import com.tracker.service.TopicService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class TopicController {
 
     // ================= GET ALL =================
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<List<TopicResponse>>> getAll() {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -72,6 +74,7 @@ public class TopicController {
 
     // ================= DELETE =================
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<String>> deleteTopic(@PathVariable String id) {
         topicService.deleteTopic(id);
         return ResponseEntity.ok(
@@ -81,6 +84,7 @@ public class TopicController {
 
     // ================= STATS =================
     @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<LearningStats>> stats() {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Statistics retrieved", topicService.getStats())
@@ -135,6 +139,7 @@ public class TopicController {
 
     // ================= BULK UPLOAD =================
     @PostMapping("/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BulkUploadResponse>> bulkUpload(
             @RequestBody List<TopicRequest> requests
     ) {
