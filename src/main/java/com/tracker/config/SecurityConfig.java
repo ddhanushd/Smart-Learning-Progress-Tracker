@@ -1,0 +1,67 @@
+package com.tracker.config;
+
+import com.tracker.security.JwtAccessDeniedHandler;
+import com.tracker.security.JwtAuthEntryPoint;
+import com.tracker.security.JwtAuthenticationFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+    // ✅ ALL dependencies injected here
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            JwtAuthEntryPoint jwtAuthEntryPoint,
+            JwtAccessDeniedHandler jwtAccessDeniedHandler) {
+
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtAuthEntryPoint = jwtAuthEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtAuthEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers("/api/v1/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}
