@@ -221,15 +221,3 @@ Backend Developer | Java & Spring Boot
 ⭐ Like this project?
 Give it a ⭐ on GitHub — contributions are welcome!
 
-yaml
-Copy code
-
----
-
-If you want next, I can:
-- ✅ Compress this to **1-page recruiter version**
-- ✅ Write **resume bullets** from this project
-- ✅ Prepare **interview explanation (JWT + refresh tokens)**
-- ✅ Add **architecture diagram (PNG / Mermaid)**
-
-Just say the word 👌
