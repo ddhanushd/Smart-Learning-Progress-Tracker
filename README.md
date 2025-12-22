@@ -1,154 +1,160 @@
 # 🚀 Smart Learning Progress Tracker (Backend)
 
-A production-ready **Spring Boot + MongoDB** backend application to track learning progress, manage topic confidence, revisions, deadlines, and analytics — designed with clean architecture and real-world best practices.
+A **production-ready Spring Boot + MongoDB backend** to track learning progress across topics, manage confidence levels, revisions, deadlines, and analytics — designed using **clean architecture** and **real-world backend best practices**.
 
-> Built to demonstrate enterprise-level backend engineering skills including security, DTO mapping, versioned APIs, and scalable design.
+This project demonstrates **enterprise-level backend engineering**, including **stateless security**, **role-based access control**, **refresh token lifecycle management**, and **secure API documentation**.
 
 ---
 
 ## ✨ Key Features
 
-* ✅ Topic-based learning tracker
-* ✅ Confidence scoring with revision history
-* ✅ Deadline & overdue tracking
-* ✅ Bulk upload support
-* ✅ Statistics dashboard API
-* ✅ Advanced search & sorting
-* ✅ Pagination support
-* ✅ API Response Wrapper (standardized responses)
-* ✅ DTO Mapping (no entity leakage)
-* ✅ Versioned APIs (/api/v1)
-* ✅ Swagger API Documentation
-* ✅ Secure MongoDB configuration (Environment variables)
+### 📚 Learning Management
+- Topic-based learning tracker  
+- Confidence scoring with revision history  
+- Deadline & overdue tracking  
+- Learning statistics dashboard  
+- Advanced search & sorting  
+- Pagination support  
+- Bulk upload support (**ADMIN only**)  
+
+---
+
+### 🔐 Security & Authentication
+- JWT-based **stateless authentication**
+- Short-lived **Access Tokens**
+- Long-lived **Refresh Tokens**
+- Secure logout via **refresh-token invalidation**
+- Role-based authorization (**USER / ADMIN**)
+- Clean **401 Unauthorized** & **403 Forbidden** handling
+- Swagger secured with **JWT Bearer authentication**
 
 ---
 
 ## 🏗️ Tech Stack
 
-| Layer         | Technology                  |
-| ------------- | --------------------------- |
-| Language      | Java 21                     |
-| Framework     | Spring Boot 3.5+            |
-| Database      | MongoDB Atlas               |
-| Documentation | Swagger (springdoc-openapi) |
-| Build Tool    | Maven                       |
-| Security      | Environment Variables       |
+| Layer        | Technology                          |
+|-------------|-------------------------------------|
+| Language     | Java 21                              |
+| Framework    | Spring Boot 3.5+                     |
+| Security     | Spring Security + JWT                |
+| Database     | MongoDB Atlas                        |
+| Build Tool   | Maven                                |
+| API Docs     | Swagger (springdoc-openapi)          |
 
 ---
 
-## 📦 Project Structure
+## 🧠 Architecture Overview
 
-```
-Smart-Learning-Progress-Tracker
-│
-├── src/main/java/com/tracker
-│   ├── controller
-│   ├── service
-│   ├── repository
-│   ├── dto
-│   ├── mapper
-│   └── model
-│
-├── src/main/resources
-│
-├── .gitignore
-├── pom.xml
-└── README.md
-```
+Client
+↓
+Controller
+↓
+Service
+↓
+Repository
+↓
+MongoDB
 
----
+yaml
+Copy code
 
-## 🔐 Security Configuration
-
-MongoDB credentials are **NOT stored in code**.
-They are injected using environment variables.
-
-### ✅ Required Environment Variable
-
-```
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/smart_learning_db
-```
-
-### application.properties
-
-```properties
-spring.data.mongodb.uri=${MONGODB_URI}
-```
-
-> Never commit passwords or credentials to GitHub.
+### Design Principles
+- Stateless REST APIs  
+- Clear separation of concerns  
+- DTO-based API contracts (no entity leakage)  
+- Versioned APIs (`/api/v1`)  
 
 ---
 
-## ▶️ Running the Project
+## 🔑 Authentication & Authorization Flow
 
-### 1️⃣ Clone the Repository
+### 🔐 Login  
+**POST** `/auth/login`
 
-```bash
-git clone https://github.com/ddhanushd/Smart-Learning-Progress-Tracker.git
-cd Smart-Learning-Progress-Tracker
-```
-
-### 2️⃣ Set Environment Variable (Windows)
-
-```powershell
-setx MONGODB_URI "mongodb+srv://user:password@cluster.mongodb.net/smart_learning_db"
-```
-
-Restart IDE after setting.
-
-### 3️⃣ Run Application
-
-```
-mvn spring-boot:run
-```
-
-Server starts at:
-
-```
-http://localhost:9090
-```
+- Validates credentials  
+- Returns:
+  - **Access Token** (JWT – short-lived)
+  - **Refresh Token** (UUID – long-lived, stored in DB)
 
 ---
 
-## 📘 Swagger Documentation
+### 🔁 Token Refresh  
+**POST** `/auth/refresh`
 
-Access interactive API docs here:
+- Uses refresh token to issue a new access token  
+- No re-login required  
 
-```
+---
+
+### 🔓 Logout  
+**POST** `/auth/logout`
+
+- Invalidates refresh token server-side  
+- Access token expires naturally  
+
+---
+
+## 👥 Role-Based Access Control
+
+| Role  | Permissions |
+|------|-------------|
+| USER  | Read topics, revise, view stats |
+| ADMIN | Bulk upload, admin operations |
+
+Authorization enforced using:
+```java
+@PreAuthorize("hasRole('ADMIN')")
+🔐 Token Storage Strategy
+Access Token
+Stored client-side only
+
+Not stored in DB
+
+Not stored in server session
+
+Sent via Authorization: Bearer <token>
+
+Refresh Token
+Stored server-side (MongoDB) with expiry
+
+Stored client-side securely
+
+Enables logout & session control
+
+📘 Swagger API Documentation
+Swagger UI is secured with JWT authentication.
+
+📍 Access:
+bash
+Copy code
 http://localhost:9090/swagger-ui/index.html
-```
+Steps:
+Click Authorize 🔒
 
----
+Enter:
 
-## 🔗 API Endpoints
+php-template
+Copy code
+Bearer <ACCESS_TOKEN>
+🔗 API Endpoints
+🔐 Auth
+Method	Endpoint	Description
+POST	/auth/login	Login
+POST	/auth/refresh	Refresh access token
+POST	/auth/logout	Logout
 
-Base URL:
+📚 Topics
+Method	Endpoint	Access
+GET	/api/v1/topics	USER / ADMIN
+GET	/api/v1/topics/stats	USER / ADMIN
+GET	/api/v1/topics/search	USER / ADMIN
+POST	/api/v1/topics/bulk	ADMIN
+PUT	/api/v1/topics/{id}/revise	USER
+PUT	/api/v1/topics/{id}/complete	USER
 
-```
-/api/v1/topics
-```
-
-| Method | Endpoint       | Description        |
-| ------ | -------------- | ------------------ |
-| POST   | /              | Create Topic       |
-| GET    | /              | Get All Topics     |
-| GET    | /{id}          | Get Topic by ID    |
-| GET    | /weak          | Weak Topics        |
-| PUT    | /{id}/revise   | Revise Topic       |
-| PUT    | /{id}/complete | Mark as Complete   |
-| PUT    | /{id}/deadline | Update Deadline    |
-| GET    | /stats         | Learning Stats     |
-| GET    | /sorted        | Sort by Confidence |
-| GET    | /search?q=     | Search Topics      |
-| GET    | /overdue       | Overdue Topics     |
-| POST   | /bulk          | Bulk Upload        |
-
-
----
-
-## 📊 Sample Response
-
-```json
+🧪 Sample API Response
+json
+Copy code
 {
   "success": true,
   "message": "Topics fetched successfully",
@@ -158,54 +164,60 @@ Base URL:
     "confidence": 85,
     "status": "STRONG",
     "completed": false,
-    "deadline": "2025-12-15",
-    "revisions": [
-      {
-        "revisedAt": "2025-11-22T14:05:38",
-        "oldConfidence": 30,
-        "newConfidence": 85,
-        "note": "Completed mock interview"
-      }
-    ]
+    "deadline": "2025-12-15"
   }
 }
-```
+🔐 Security Highlights (Interview-Ready)
+Fully stateless JWT authentication
 
----
+No server-side session storage
 
-## 🧠 Architecture Highlights
+Refresh tokens stored with expiry
 
-* DTO Mapping: Separation of database and API contract
-* Layered architecture (Controller → Service → Repository)
-* Clean business logic isolation
-* Secure credentials strategy
-* Versioned API design
+Logout without JWT blacklisting
 
----
+Least-privilege role enforcement
 
-## 🚀 Future Enhancements
+Secure Swagger configuration
 
-* 🔐 User Authentication (JWT)
-* 👥 Multi-user support
-* 📅 Smart reminder scheduler
-* 🌐 Angular Frontend Integration
-* ☁️ Cloud Deployment
+Design choice:
+Access tokens are short-lived and stateless, while refresh tokens are stored server-side to enable logout and controlled session renewal.
 
----
+▶️ Running the Project
+1️⃣ Clone the repository
+bash
+Copy code
+git clone https://github.com/ddhanushd/Smart-Learning-Progress-Tracker.git
+cd Smart-Learning-Progress-Tracker
+2️⃣ Configure MongoDB
+properties
+Copy code
+spring.data.mongodb.uri=${MONGODB_URI}
+3️⃣ Run the application
+bash
+Copy code
+mvn spring-boot:run
+Server:
+arduino
+Copy code
+http://localhost:9090
+🚀 Future Enhancements
+Angular frontend integration
 
-## 👤 Author
+Token rotation strategy
 
-**D Dhanush**
+Audit logging
+
+Rate limiting
+
+Cloud deployment
+
+👤 Author
+D Dhanush
 Backend Developer | Java & Spring Boot
 
-GitHub: [https://github.com/ddhanushd](https://github.com/ddhanushd)
+🔗 GitHub: https://github.com/ddhanushd
 
----
+⭐ Like this project?
+Give it a ⭐ on GitHub — contributions are welcome!
 
-## ⭐ If you like this project
-
-Please give it a ⭐ on GitHub and feel free to contribute!
-
----
-
-> This project demonstrates production-level backend development practices and is ideal for showcasing in interviews and portfolios.
