@@ -3,6 +3,8 @@ package com.tracker.controller;
 import com.tracker.model.User;
 import com.tracker.repository.UserRepository;
 import com.tracker.security.JwtUtil;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -32,27 +35,34 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
-    // 🔐 LOGIN → access + refresh token
+    //LOGIN → access + refresh token
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody Map<String, String> request) {
 
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.get("username"),
-                                request.get("password")
-                        )
-                );
-
         String username = request.get("username");
+        log.info("Login attempt received for user: {}", username);
+
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            username,
+                            request.get("password")
+                    )
+            );
+        } catch (Exception ex) {
+            log.warn("Authentication failed for user: {}", username);
+            throw ex;
+        }
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> {
+                    log.error("Authenticated user not found in DB: {}", username);
+                    return new RuntimeException("User not found");
+                });
 
-        // Access token (JWT)
         String accessToken = jwtUtil.generateToken(username);
 
-        // Refresh token (UUID)
         String refreshToken = UUID.randomUUID().toString();
         user.setRefreshToken(refreshToken);
         user.setRefreshTokenExpiry(
@@ -60,8 +70,8 @@ public class AuthController {
         );
 
         userRepository.save(user);
-        System.out.println("LOGIN refreshToken = " + refreshToken);
-        System.out.println("LOGIN expiry = " + user.getRefreshTokenExpiry());
+
+        log.info("Login successful for user: {}", username);
 
         return Map.of(
                 "accessToken", accessToken,
@@ -70,29 +80,31 @@ public class AuthController {
         );
     }
 
-    // 🔁 REFRESH TOKEN → new access token
+
+    // REFRESH TOKEN → new access token
     @PostMapping("/refresh")
     public Map<String, String> refresh(@RequestBody Map<String, String> request) {
 
+        log.info("Refresh token request received");
+
         String refreshToken = request.get("refreshToken");
 
-        System.out.println("REFRESH token received = " + refreshToken);
-
         User user = userRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> {
+                    log.warn("Invalid refresh token used");
+                    return new RuntimeException("Invalid refresh token");
+                });
 
-        System.out.println("DB token = " + user.getRefreshToken());
-        System.out.println("DB expiry = " + user.getRefreshTokenExpiry());
-
-        // ✅ NULL SAFETY CHECK
         if (user.getRefreshTokenExpiry() == null ||
                 user.getRefreshTokenExpiry().isBefore(Instant.now())) {
 
-            throw new RuntimeException("Refresh token expired or invalid");
+            log.warn("Expired refresh token for user: {}", user.getUsername());
+            throw new RuntimeException("Refresh token expired");
         }
 
-        String newAccessToken =
-                jwtUtil.generateToken(user.getUsername());
+        String newAccessToken = jwtUtil.generateToken(user.getUsername());
+
+        log.info("Access token refreshed for user: {}", user.getUsername());
 
         return Map.of(
                 "accessToken", newAccessToken,
@@ -100,23 +112,31 @@ public class AuthController {
         );
     }
 
+
     @PostMapping("/logout")
     public Map<String, String> logout(@RequestBody Map<String, String> request) {
+
+        log.info("Logout request received");
 
         String refreshToken = request.get("refreshToken");
 
         User user = userRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> {
+                    log.warn("Invalid refresh token during logout");
+                    return new RuntimeException("Invalid refresh token");
+                });
 
-        // 🔒 Invalidate refresh token
         user.setRefreshToken(null);
         user.setRefreshTokenExpiry(null);
 
         userRepository.save(user);
 
+        log.info("User logged out successfully: {}", user.getUsername());
+
         return Map.of(
                 "message", "Logged out successfully"
         );
     }
+
 
 }

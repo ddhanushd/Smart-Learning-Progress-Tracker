@@ -31,6 +31,7 @@ public class TopicController {
 
     // ================= CREATE =================
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<TopicResponse>> create(@Valid @RequestBody TopicRequest request) {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -59,6 +60,7 @@ public class TopicController {
 
     // ================= WEAK =================
     @GetMapping("/weak")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<List<TopicResponse>>> getWeakTopics() {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -93,6 +95,7 @@ public class TopicController {
 
     // ================= SEARCH =================
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<List<TopicResponse>>> search(@RequestParam String q) {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -108,6 +111,7 @@ public class TopicController {
 
     // ================= SORTED =================
     @GetMapping("/sorted")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<List<TopicResponse>>> sorted() {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -123,6 +127,7 @@ public class TopicController {
 
     // ================= PAGINATION =================
     @GetMapping("/page")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<Page<TopicResponse>>> paged(
             @RequestParam int page,
             @RequestParam int size
@@ -154,6 +159,7 @@ public class TopicController {
 
     // ================= REVISE =================
     @PutMapping("/{id}/revise")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<TopicResponse>> revise(
             @PathVariable String id,
             @RequestBody RevisionRequest request
@@ -171,6 +177,7 @@ public class TopicController {
 
     // ================= COMPLETE =================
     @PutMapping("/{id}/complete")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<TopicResponse>> markCompleted(@PathVariable String id) {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -183,6 +190,7 @@ public class TopicController {
 
     // ================= OVERDUE =================
     @GetMapping("/overdue")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<List<TopicResponse>>> overdue() {
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -198,6 +206,7 @@ public class TopicController {
 
     // ================= DEADLINE =================
     @PutMapping("/{id}/deadline")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<TopicResponse>> updateDeadline(
             @PathVariable String id,
             @RequestBody DeadlineRequest request
@@ -213,7 +222,9 @@ public class TopicController {
         );
     }
 
+    // ================= GET BY ID =================
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<TopicResponse>> getById(@PathVariable String id) {
         return ResponseEntity.ok(
                 new ApiResponse<>(
