@@ -5,6 +5,7 @@ import com.tracker.security.JwtAuthEntryPoint;
 import com.tracker.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,12 +50,16 @@ public class SecurityConfig {
                         .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ VERY IMPORTANT — allow preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(
                                 "/auth/**",
                                 "/api/v1/topics/health",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -77,10 +82,10 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOriginPatterns(List.of(
+        config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "https://*.vercel.app",
-                "https://*.onrender.com"
+                "https://smart-learning-progress-tracker-ui.onrender.com",
+                "https://smart-learning-progress-tracker-ui.vercel.app"
         ));
 
         config.setAllowedMethods(List.of(
@@ -96,6 +101,5 @@ public class SecurityConfig {
 
         return source;
     }
-
 
 }
