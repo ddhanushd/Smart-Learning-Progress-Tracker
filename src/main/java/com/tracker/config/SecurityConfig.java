@@ -79,7 +79,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "https://smart-learning-progress-tracker-ui.onrender.com"
+                "https://smart-learning-progress-tracker-ui.onrender.com",
+                "https://smart-learning-progress-tracker-ui.vercel.app"
         ));
 
         config.setAllowedMethods(List.of(
