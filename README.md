@@ -9,7 +9,7 @@ This project demonstrates **enterprise-grade backend engineering**, including **
 ## 🌍 Live Deployment
 
 **Backend API (Render):**  
-👉 https://smart-learning-progress-tracker.onrender.com
+https://smart-learning-progress-tracker-1.onrender.com
 
 > All APIs are secured using JWT authentication.  
 > Users must **register and login** to access protected endpoints.
