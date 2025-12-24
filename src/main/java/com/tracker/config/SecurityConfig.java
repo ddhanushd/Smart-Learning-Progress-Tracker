@@ -77,10 +77,10 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(
+        config.setAllowedOriginPatterns(List.of(
                 "http://localhost:4200",
-                "https://smart-learning-progress-tracker-ui.onrender.com",
-                "https://smart-learning-progress-tracker-ui.vercel.app"
+                "https://*.vercel.app",
+                "https://*.onrender.com"
         ));
 
         config.setAllowedMethods(List.of(
@@ -96,5 +96,6 @@ public class SecurityConfig {
 
         return source;
     }
+
 
 }
